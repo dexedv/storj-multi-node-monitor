@@ -27,7 +27,7 @@ from datetime import datetime, timezone
 LISTEN_PORT = 9651       # Port for Prometheus to scrape
 LISTEN_HOST = "0.0.0.0"  # Listen on all interfaces
 NODE_HOST = "127.0.0.1"
-NODE_PORTS = [14002, 14003, 14004, 14005]  # Your Storj node dashboard ports
+NODE_PORTS = [14002]  # Single consolidated Storj node (was 4, /24 limit makes more useless)
 REQUEST_TIMEOUT = 5
 
 # --- Helpers ---

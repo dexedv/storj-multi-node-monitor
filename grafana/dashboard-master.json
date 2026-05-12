@@ -4,158 +4,142 @@
   "graphTooltip": 1,
   "id": null,
   "links": [
-    { "title": "📱 Mobile-Dashboard", "type": "dashboards", "tags": ["storj-mobile"], "asDropdown": false, "includeVars": false, "keepTime": true, "targetBlank": false, "icon": "external link" },
-    { "title": "📺 TV-Dashboard", "type": "dashboards", "tags": ["storj-tv"], "asDropdown": false, "includeVars": false, "keepTime": true, "targetBlank": false, "icon": "external link" },
-    { "title": "🔍 Per-Node Drilldown", "type": "dashboards", "tags": ["storj-drilldown"], "asDropdown": false, "includeVars": false, "keepTime": true, "targetBlank": false, "icon": "external link" },
-    { "title": "Storj Node 14002", "type": "link", "url": "http://localhost:14002", "icon": "external link", "targetBlank": true, "tags": [] },
-    { "title": "Storj Node 14003", "type": "link", "url": "http://localhost:14003", "icon": "external link", "targetBlank": true, "tags": [] },
-    { "title": "Storj Node 14004", "type": "link", "url": "http://localhost:14004", "icon": "external link", "targetBlank": true, "tags": [] },
-    { "title": "Storj Node 14005", "type": "link", "url": "http://localhost:14005", "icon": "external link", "targetBlank": true, "tags": [] }
+    { "title": "🌐 All-in-One", "type": "link", "url": "/d/depin-allinone", "icon": "external link", "tags": [] },
+    { "title": "🌐 Storj Web-UI", "type": "link", "url": "http://localhost:14002", "icon": "external link", "targetBlank": true, "tags": [] },
+    { "title": "Storj Stats (online)", "type": "link", "url": "https://stats.storjshare.io", "icon": "external link", "targetBlank": true, "tags": [] }
   ],
   "tags": ["storj"],
-  "title": "Storj Multi-Node Monitor",
+  "title": "Storj Node Monitor",
   "uid": "storj-multi-node",
   "schemaVersion": 39,
-  "version": 6,
+  "version": 12,
   "refresh": "30s",
-  "time": { "from": "now-6h", "to": "now" },
+  "time": { "from": "now-24h", "to": "now" },
   "timepicker": { "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"], "time_options": ["15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"] },
   "timezone": "browser",
   "style": "dark",
-  "templating": {
-    "list": [
-      {
-        "name": "node",
-        "label": "Node",
-        "type": "query",
-        "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-        "query": { "qryType": 1, "query": "label_values(storj_node_up, node)", "refId": "StandardVariableQuery" },
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".+",
-        "current": { "selected": true, "text": ["All"], "value": ["$__all"] }
-      }
-    ]
-  },
+  "templating": { "list": [] },
   "panels": [
-    { "type": "stat", "title": "", "id": 999, "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
-      "description": "Fleet-Gesundheit auf einen Blick. Grün = alles OK. Gelb = warnt (QUIC oder Software outdated). Rot = Node offline.",
+    { "type": "stat", "title": "", "id": 999, "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "description": "Node-Gesamtstatus. Grün = up + QUIC OK + up-to-date.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj:fleet_min_status", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "storj:node_status_rank", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": {
         "color": { "mode": "thresholds" },
         "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 1 }, { "color": "#00d4aa", "value": 2 }] },
         "mappings": [{ "type": "value", "options": {
-          "0": { "text": "🔴 PROBLEM — eine oder mehrere Nodes offline. Sofort pruefen!", "color": "red" },
-          "1": { "text": "🟡 WARNUNG — Nodes laufen aber QUIC oder Update-Status nicht ideal", "color": "yellow" },
-          "2": { "text": "🟢 Alle Systeme nominal — Fleet healthy", "color": "#00d4aa" }
+          "0": { "text": "🔴 STORJ NODE OFFLINE — sofort prüfen", "color": "red" },
+          "1": { "text": "🟡 Warnung — QUIC oder Software-Update Problem", "color": "yellow" },
+          "2": { "text": "🟢 Storj Node läuft sauber — alle Subsystems OK", "color": "#00d4aa" }
         } }],
         "unit": "none"
       } },
       "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
 
-    { "type": "row", "title": "📊 Übersicht", "id": 1000, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 }, "collapsed": false, "panels": [] },
+    { "type": "row", "title": "📊 Übersicht", "id": 1000, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 3 }, "collapsed": false, "panels": [] },
 
-    { "type": "stat", "title": "Nodes Online", "id": 1, "gridPos": { "h": 3, "w": 3, "x": 0, "y": 3 },
+    { "type": "gauge", "title": "Disk-Auslastung", "id": 1, "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
+      "description": "Prozentuale Auslastung der allozierten Storj-Disk. Bei >95% blockt Storj neue Uploads.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj:disk_used_percent", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "min": 0, "max": 100, "decimals": 2 } },
+      "options": { "showThresholdMarkers": true, "showThresholdLabels": true, "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "stat", "title": "Belegter Speicher", "id": 2, "gridPos": { "h": 6, "w": 5, "x": 6, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
-        { "expr": "sum(storj_node_up)", "refId": "A", "legendFormat": "online" },
-        { "expr": "count(storj_node_up)", "refId": "B", "legendFormat": "gesamt" }
+        { "expr": "storj_disk_used_bytes", "refId": "A", "legendFormat": "belegt" },
+        { "expr": "storj_disk_trash_bytes", "refId": "B", "legendFormat": "trash" },
+        { "expr": "storj_disk_available_bytes", "refId": "C", "legendFormat": "frei" }
       ],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 1 }, { "color": "#00d4aa", "value": 4 }] }, "unit": "none" } },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      "fieldConfig": { "defaults": { "unit": "bytes", "decimals": 2, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "text" }] } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "belegt" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
+          { "matcher": { "id": "byName", "options": "trash" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ffb84d" } }] },
+          { "matcher": { "id": "byName", "options": "frei" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] }
+        ] },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Belegter Speicher", "id": 2, "gridPos": { "h": 3, "w": 4, "x": 3, "y": 3 },
+    { "type": "stat", "title": "Disk voll in", "id": 3, "gridPos": { "h": 6, "w": 3, "x": 11, "y": 4 },
+      "description": "Forecast wann die allozierte Disk voll ist, basierend auf Wachstumsrate der letzten 6h. Sinnvoll erst nach mehreren Stunden Datensammlung.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "clamp_min(storj:disk_full_in_days, 0)", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "#00d4aa", "value": 90 }] }, "unit": "d", "decimals": 0 } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Einnahmen (Monat)", "id": 4, "gridPos": { "h": 6, "w": 5, "x": 14, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
-        { "expr": "sum(storj_disk_used_bytes)", "refId": "A", "legendFormat": "belegt" },
-        { "expr": "100 * sum(storj_disk_used_bytes) / (sum(storj_disk_used_bytes) + sum(storj_disk_available_bytes) + sum(storj_disk_trash_bytes))", "refId": "B", "legendFormat": "%" }
-      ],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 },
-        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 1 }, { "id": "color", "value": { "mode": "thresholds" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] } }] }] },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
-    },
-    { "type": "stat", "title": "Frei", "id": 3, "gridPos": { "h": 3, "w": 3, "x": 7, "y": 3 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj_disk_available_bytes)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 100000000000 }, { "color": "#00d4aa", "value": 500000000000 }] }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area" }
-    },
-    { "type": "stat", "title": "Bandbreite (Monat)", "id": 4, "gridPos": { "h": 3, "w": 3, "x": 10, "y": 3 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj_bandwidth_used_bytes)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area" }
-    },
-    { "type": "stat", "title": "Einnahmen", "id": 5, "gridPos": { "h": 3, "w": 4, "x": 13, "y": 3 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "sum(storj_payout_current_month_usd)", "refId": "A", "legendFormat": "USD" },
-        { "expr": "sum(storj_payout_current_month_usd) * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "B", "legendFormat": "EUR" }
+        { "expr": "storj_payout_current_month_usd", "refId": "A", "legendFormat": "aktuell" },
+        { "expr": "storj:earnings_forecast_total_usd", "refId": "B", "legendFormat": "Forecast" },
+        { "expr": "storj_payout_current_month_usd * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "C", "legendFormat": "in EUR" }
       ],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 },
-        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }] },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
-    },
-    { "type": "stat", "title": "Forecast Monatsende", "id": 7, "gridPos": { "h": 3, "w": 4, "x": 17, "y": 3 },
-      "description": "Lineare Hochrechnung: bei aktueller Verdienstrate kommst du bis Monatsende etwa auf diesen Betrag.",
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj:earnings_forecast_total_usd", "refId": "A", "legendFormat": "USD" },
-        { "expr": "storj:earnings_forecast_total_usd * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "B", "legendFormat": "EUR" }
-      ],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "currencyUSD", "decimals": 2 },
-        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }] },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
-    },
-    { "type": "stat", "title": "Held", "id": 6, "gridPos": { "h": 3, "w": 3, "x": 21, "y": 3 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj_payout_current_held_usd)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "currencyUSD", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area" }
-    },
-
-    { "type": "row", "title": "⚡ Live-Aktivität & Preis", "id": 1001, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "collapsed": false, "panels": [] },
-
-    { "type": "stat", "title": "Egress live (5m)", "id": 50, "gridPos": { "h": 4, "w": 5, "x": 0, "y": 7 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj:egress_rate_5m_bps)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "Bps", "decimals": 2 } },
-      "options": { "colorMode": "background", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Ingress live (5m)", "id": 51, "gridPos": { "h": 4, "w": 5, "x": 5, "y": 7 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "Bps", "decimals": 2 } },
-      "options": { "colorMode": "background", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "STORJ-Preis", "id": 52, "gridPos": { "h": 4, "w": 5, "x": 10, "y": 7 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj_token_price_usd", "refId": "A", "legendFormat": "USD" },
-        { "expr": "storj_token_price_eur", "refId": "B", "legendFormat": "EUR" },
-        { "expr": "storj_token_price_24h_change_percent{currency=\"usd\"}", "refId": "C", "legendFormat": "24h" }
-      ],
-      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 4, "color": { "mode": "fixed", "fixedColor": "#f7c948" } },
         "overrides": [
-          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] },
-          { "matcher": { "id": "byFrameRefID", "options": "C" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 2 }, { "id": "color", "value": { "mode": "thresholds" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 0 }] } }] }
+          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
+          { "matcher": { "id": "byFrameRefID", "options": "C" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }
+        ] },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "stat", "title": "Held + Vormonat", "id": 5, "gridPos": { "h": 6, "w": 5, "x": 19, "y": 4 },
+      "description": "75% wird die ersten 9 Monate zurückgehalten, dann schrittweise freigegeben. Volle Auszahlung erst nach 15 Monaten ohne Disqualifizierung.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_payout_current_held_usd", "refId": "A", "legendFormat": "Held aktuell" },
+        { "expr": "storj_payout_previous_month_usd", "refId": "B", "legendFormat": "Vormonat" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "currencyUSD", "decimals": 2 },
+        "overrides": [
+          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "text" } }] }
         ] },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Host CPU", "id": 53, "gridPos": { "h": 4, "w": 4, "x": 15, "y": 7 },
+
+    { "type": "row", "title": "⚡ Live-Aktivität & System", "id": 1001, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 }, "collapsed": false, "panels": [] },
+
+    { "type": "stat", "title": "Egress live (5m)", "id": 10, "gridPos": { "h": 4, "w": 4, "x": 0, "y": 11 },
+      "description": "Aktuelle Egress-Rate (Daten die zu Kunden raus gehen). 5-Minuten-Durchschnitt.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(storj:egress_rate_5m_bps)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "Bps", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Ingress live (5m)", "id": 11, "gridPos": { "h": 4, "w": 4, "x": 4, "y": 11 },
+      "description": "Aktuelle Ingress-Rate (neue Daten die auf die Disk geschrieben werden). 5-Minuten-Durchschnitt.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "Bps", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Bandbreite (Monat)", "id": 12, "gridPos": { "h": 4, "w": 4, "x": 8, "y": 11 },
+      "description": "Total Bandbreite seit Monatsbeginn (Ingress + Egress kombiniert).",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_bandwidth_used_bytes", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    { "type": "stat", "title": "Uptime", "id": 13, "gridPos": { "h": 4, "w": 4, "x": 12, "y": 11 },
+      "description": "% der Zeit, in der die Node antwortet. 24h/7d/30d Fenster.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj:uptime_24h_percent", "refId": "A", "legendFormat": "24h" },
+        { "expr": "storj:uptime_7d_percent", "refId": "B", "legendFormat": "7d" },
+        { "expr": "storj:uptime_30d_percent", "refId": "C", "legendFormat": "30d" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "#00d4aa", "value": 99 }] }, "unit": "percent", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "vertical", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "stat", "title": "Host CPU", "id": 14, "gridPos": { "h": 4, "w": 4, "x": 16, "y": 11 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "100 * (1 - avg(rate(windows_cpu_time_total{mode=\"idle\"}[2m])))", "refId": "A" }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 70 }, { "color": "red", "value": 90 }] }, "unit": "percent", "decimals": 1, "min": 0, "max": 100 } },
       "options": { "colorMode": "value", "graphMode": "area" }
     },
-    { "type": "stat", "title": "Host RAM", "id": 54, "gridPos": { "h": 4, "w": 5, "x": 19, "y": 7 },
+    { "type": "stat", "title": "Host RAM", "id": 15, "gridPos": { "h": 4, "w": 4, "x": 20, "y": 11 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
-        { "expr": "100 * (1 - windows_memory_available_bytes / windows_cs_physical_memory_bytes)", "refId": "A", "legendFormat": "Auslastung" },
+        { "expr": "100 * (1 - windows_memory_available_bytes / windows_cs_physical_memory_bytes)", "refId": "A", "legendFormat": "%" },
         { "expr": "windows_memory_available_bytes", "refId": "B", "legendFormat": "frei" }
       ],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "decimals": 1, "min": 0, "max": 100 },
@@ -163,230 +147,175 @@
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
 
-    { "type": "row", "title": "📦 Node-Details", "id": 1002, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 }, "collapsed": false, "panels": [] },
-    { "type": "row", "title": "Node $node", "id": 1010, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 }, "collapsed": false, "repeat": "node", "repeatDirection": "v", "panels": [] },
+    { "type": "row", "title": "💾 Geschrieben (Storj-Ingress)", "id": 1002, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 }, "collapsed": false, "panels": [] },
 
-    { "type": "stat", "title": "Status", "id": 10, "gridPos": { "h": 4, "w": 3, "x": 0, "y": 13 },
+    { "type": "stat", "title": "Letzte 10 min", "id": 20, "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_node_up{node=\"$node\"}", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "ONLINE", "color": "#00d4aa" } } }], "unit": "none" } },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
-    { "type": "gauge", "title": "Disk %", "id": 11, "gridPos": { "h": 4, "w": 4, "x": 3, "y": 13 },
+    { "type": "stat", "title": "Letzte 1 h", "id": 21, "gridPos": { "h": 4, "w": 4, "x": 4, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj:disk_used_percent{node=\"$node\"}", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "min": 0, "max": 100, "decimals": 1 } },
-      "options": { "showThresholdMarkers": true, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[1h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
-    { "type": "stat", "title": "Voll in", "id": 12, "gridPos": { "h": 4, "w": 2, "x": 7, "y": 13 },
-      "description": "Forecast wann die Disk voll ist, basierend auf aktueller Füllrate. < 30 Tage: gelb, < 1 Tag: rot.",
+    { "type": "stat", "title": "Letzte 5 h", "id": 22, "gridPos": { "h": 4, "w": 4, "x": 8, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "clamp_min(storj:disk_full_in_days{node=\"$node\"}, 0)", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "#00d4aa", "value": 90 }] }, "unit": "d", "decimals": 0 } },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[5h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
-    { "type": "stat", "title": "Speicher", "id": 13, "gridPos": { "h": 4, "w": 4, "x": 9, "y": 13 },
+    { "type": "stat", "title": "Letzte 10 h", "id": 23, "gridPos": { "h": 4, "w": 4, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Letzte 24 h", "id": 24, "gridPos": { "h": 4, "w": 4, "x": 16, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[24h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Schreib-Rate live", "id": 25, "gridPos": { "h": 4, "w": 4, "x": 20, "y": 16 },
+      "description": "Aktuelle Schreib-Rate auf die Disk (5m-Durchschnitt). Identisch zu Ingress oben.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "Bps", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
+    },
+
+    { "type": "row", "title": "🛰️ Satelliten-Scores", "id": 1003, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 }, "collapsed": false, "panels": [] },
+
+    { "type": "table", "title": "Reputation pro Satellit", "id": 30, "gridPos": { "h": 8, "w": 24, "x": 0, "y": 21 },
+      "description": "Audit-/Suspension-/Online-Score pro Satellit. < 0.95 = Suspension droht, < 0.85 = Disqualifizierungs-Risiko. Plus Traffic-Aufteilung Ingress/Egress.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
-        { "expr": "storj_disk_used_bytes{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "belegt" },
-        { "expr": "storj_disk_available_bytes{node=\"$node\"}", "refId": "B", "instant": true, "legendFormat": "frei" },
-        { "expr": "storj_disk_trash_bytes{node=\"$node\"}", "refId": "C", "instant": true, "legendFormat": "trash" }
+        { "expr": "storj_satellite_audit_score", "refId": "A", "format": "table", "instant": true },
+        { "expr": "storj_satellite_suspension_score", "refId": "B", "format": "table", "instant": true },
+        { "expr": "storj_satellite_online_score", "refId": "C", "format": "table", "instant": true },
+        { "expr": "storj_satellite_ingress_bytes", "refId": "D", "format": "table", "instant": true },
+        { "expr": "storj_satellite_egress_bytes", "refId": "E", "format": "table", "instant": true }
       ],
-      "fieldConfig": { "defaults": { "unit": "bytes", "decimals": 1, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "text" }] } },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "satellite_id": true, "node": true }, "renameByName": { "satellite": "Satellit", "Value #A": "Audit", "Value #B": "Suspension", "Value #C": "Online", "Value #D": "Ingress (Monat)", "Value #E": "Egress (Monat)" }, "indexByName": { "satellite": 0, "Value #A": 1, "Value #B": 2, "Value #C": 3, "Value #D": 4, "Value #E": 5 } } }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "center", "filterable": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "Audit|Suspension|Online" }, "properties": [
+            { "id": "unit", "value": "percentunit" }, { "id": "decimals", "value": 4 }, { "id": "min", "value": 0.85 }, { "id": "max", "value": 1 },
+            { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+            { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } }
+          ] },
+          { "matcher": { "id": "byRegexp", "options": "Ingress|Egress" }, "properties": [{ "id": "unit", "value": "bytes" }, { "id": "decimals", "value": 2 }] },
+          { "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.width", "value": 150 }] }
+        ]
+      }
+    },
+
+    { "type": "row", "title": "📈 Verläufe", "id": 1004, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 }, "collapsed": false, "panels": [] },
+
+    { "type": "timeseries", "title": "Disk-Wachstum", "id": 40, "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "description": "Wie wächst dein Disk-Verbrauch über Zeit. Aufgeteilt nach belegt/trash.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_disk_used_bytes", "refId": "A", "legendFormat": "belegt" },
+        { "expr": "storj_disk_trash_bytes", "refId": "B", "legendFormat": "trash" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 25, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never", "stacking": { "mode": "normal", "group": "A" } } },
         "overrides": [
           { "matcher": { "id": "byName", "options": "belegt" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
-          { "matcher": { "id": "byName", "options": "frei" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
           { "matcher": { "id": "byName", "options": "trash" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ffb84d" } }] }
         ] },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
-    },
-    { "type": "stat", "title": "Bandbreite", "id": 14, "gridPos": { "h": 4, "w": 3, "x": 13, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj_bandwidth_used_bytes{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "Monat" },
-        { "expr": "sum(storj:egress_rate_5m_bps{node=\"$node\"}) + sum(storj:ingress_rate_5m_bps{node=\"$node\"})", "refId": "B", "instant": true, "legendFormat": "live" }
-      ],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "bytes", "decimals": 2 },
-        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "Bps" }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] }] },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
-    },
-    { "type": "stat", "title": "Einnahmen", "id": 15, "gridPos": { "h": 4, "w": 3, "x": 16, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_payout_current_month_usd{node=\"$node\"}", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 } },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value" }
-    },
-    { "type": "stat", "title": "Audit (min)", "id": 16, "gridPos": { "h": 4, "w": 2, "x": 19, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "min(storj_satellite_audit_score{node=\"$node\"})", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] }, "unit": "percentunit", "decimals": 3, "min": 0.85, "max": 1 } },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value" }
-    },
-    { "type": "stat", "title": "Up 24h", "id": 17, "gridPos": { "h": 4, "w": 2, "x": 21, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj:uptime_24h_percent{node=\"$node\"}", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "#00d4aa", "value": 99 }] }, "unit": "percent", "decimals": 1 } },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value" }
-    },
-    { "type": "stat", "title": "QUIC", "id": 18, "gridPos": { "h": 4, "w": 1, "x": 23, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_node_quic_ok{node=\"$node\"}", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "NO" }, "1": { "text": "OK" } } }], "unit": "none" } },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
-    },
-
-    { "type": "row", "title": "📈 Verläufe", "id": 1003, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 200 }, "collapsed": false, "panels": [] },
-
-    { "type": "timeseries", "title": "Disk-Verlauf", "id": 30, "gridPos": { "h": 7, "w": 12, "x": 0, "y": 201 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_disk_used_bytes{node=~\"$node\"}", "refId": "A", "legendFormat": "{{node}}" }],
-      "fieldConfig": { "defaults": { "unit": "bytes", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "port_14002" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
-          { "matcher": { "id": "byName", "options": "port_14003" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#f7c948" } }] },
-          { "matcher": { "id": "byName", "options": "port_14004" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
-          { "matcher": { "id": "byName", "options": "port_14005" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#a259ff" } }] }
-        ] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    { "type": "timeseries", "title": "Einnahmen-Verlauf", "id": 31, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 201 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_payout_current_month_usd{node=~\"$node\"}", "refId": "A", "legendFormat": "{{node}}" }],
-      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2, "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 25, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "port_14002" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
-          { "matcher": { "id": "byName", "options": "port_14003" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#f7c948" } }] },
-          { "matcher": { "id": "byName", "options": "port_14004" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
-          { "matcher": { "id": "byName", "options": "port_14005" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#a259ff" } }] }
-        ] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    { "type": "timeseries", "title": "Bandbreite live (Egress + Ingress)", "id": 32, "gridPos": { "h": 7, "w": 12, "x": 0, "y": 208 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "sum by (node) (storj:egress_rate_5m_bps{node=~\"$node\"})", "refId": "A", "legendFormat": "{{node}} egress" },
-        { "expr": "sum by (node) (storj:ingress_rate_5m_bps{node=~\"$node\"})", "refId": "B", "legendFormat": "{{node}} ingress" }
-      ],
-      "fieldConfig": { "defaults": { "unit": "Bps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } } },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi" } }
     },
-    { "type": "timeseries", "title": "STORJ-Preis (USD & EUR)", "id": 33, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 208 },
+    { "type": "timeseries", "title": "Earnings (Monat) — USD", "id": 41, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_payout_current_month_usd", "refId": "A", "legendFormat": "Aktuell USD" },
+        { "expr": "storj:earnings_forecast_total_usd", "refId": "B", "legendFormat": "Forecast Monatsende" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 25, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Aktuell USD" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#f7c948" } }] },
+          { "matcher": { "id": "byName", "options": "Forecast Monatsende" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }, { "id": "custom.lineStyle", "value": { "dash": [10,10], "fill": "dash" } }] }
+        ] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] }, "tooltip": { "mode": "multi" } }
+    },
+    { "type": "timeseries", "title": "Egress / Ingress live", "id": 42, "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "sum(storj:egress_rate_5m_bps)", "refId": "A", "legendFormat": "Egress" },
+        { "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "B", "legendFormat": "Ingress" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Egress" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
+          { "matcher": { "id": "byName", "options": "Ingress" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] }
+        ] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi" } }
+    },
+    { "type": "timeseries", "title": "Audit-Scores (Risiko-Linie bei 0.95)", "id": 43, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
+      "description": "Audit-Score-Verlauf pro Satellit. Rote Linie = Suspension-Grenze 0.95. Wenn eine Linie unter die rote Linie fällt, droht Suspension.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_satellite_audit_score", "refId": "A", "legendFormat": "{{satellite}}" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0.85, "max": 1, "decimals": 4, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] }, "custom": { "drawStyle": "line", "lineWidth": 2, "showPoints": "auto", "thresholdsStyle": { "mode": "line" } } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "min"] }, "tooltip": { "mode": "multi" } }
+    },
+    { "type": "timeseries", "title": "Online-Score-Verlauf", "id": 44, "gridPos": { "h": 8, "w": 12, "x": 0, "y": 46 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_satellite_online_score", "refId": "A", "legendFormat": "{{satellite}}" }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0.85, "max": 1, "decimals": 4, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] }, "custom": { "drawStyle": "line", "lineWidth": 2, "thresholdsStyle": { "mode": "line" } } } },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "min"] }, "tooltip": { "mode": "multi" } }
+    },
+    { "type": "timeseries", "title": "Uptime & Host", "id": 45, "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
+      "description": "Storj-Up/Down + Host-CPU+RAM auf gemeinsamer Skala.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_node_up * 100", "refId": "A", "legendFormat": "Storj up (%)" },
+        { "expr": "100 * (1 - avg(rate(windows_cpu_time_total{mode=\"idle\"}[2m])))", "refId": "B", "legendFormat": "CPU %" },
+        { "expr": "100 * (1 - windows_memory_available_bytes / windows_cs_physical_memory_bytes)", "refId": "C", "legendFormat": "RAM %" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Storj up (%)" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }, { "id": "custom.lineInterpolation", "value": "stepAfter" }] },
+          { "matcher": { "id": "byName", "options": "CPU %" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#f7c948" } }] },
+          { "matcher": { "id": "byName", "options": "RAM %" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#a259ff" } }] }
+        ] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "mean"] }, "tooltip": { "mode": "multi" } }
+    },
+
+    { "type": "row", "title": "💱 STORJ-Token-Preis", "id": 1005, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 54 }, "collapsed": false, "panels": [] },
+
+    { "type": "stat", "title": "STORJ-Preis", "id": 50, "gridPos": { "h": 5, "w": 8, "x": 0, "y": 55 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_token_price_usd", "refId": "A", "legendFormat": "USD" },
+        { "expr": "storj_token_price_eur", "refId": "B", "legendFormat": "EUR" },
+        { "expr": "storj_token_price_24h_change_percent{currency=\"usd\"}", "refId": "C", "legendFormat": "24h" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 4 },
+        "overrides": [
+          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] },
+          { "matcher": { "id": "byFrameRefID", "options": "C" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "decimals", "value": 2 }, { "id": "color", "value": { "mode": "thresholds" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 0 }] } }] }
+        ] },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "timeseries", "title": "Preis-Verlauf", "id": 51, "gridPos": { "h": 5, "w": 16, "x": 8, "y": 55 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
         { "expr": "storj_token_price_usd", "refId": "A", "legendFormat": "USD" },
         { "expr": "storj_token_price_eur", "refId": "B", "legendFormat": "EUR" }
       ],
       "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 4, "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
-        "overrides": [{ "matcher": { "id": "byName", "options": "EUR" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }] },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi" } }
-    },
-    { "type": "timeseries", "title": "Host CPU & RAM", "id": 34, "gridPos": { "h": 7, "w": 24, "x": 0, "y": 215 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "100 * (1 - avg(rate(windows_cpu_time_total{mode=\"idle\"}[2m])))", "refId": "A", "legendFormat": "CPU %" },
-        { "expr": "100 * (1 - windows_memory_available_bytes / windows_cs_physical_memory_bytes)", "refId": "B", "legendFormat": "RAM %" }
-      ],
-      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } } },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max", "mean"] }, "tooltip": { "mode": "multi" } }
-    },
-
-    { "type": "row", "title": "💾 Schreib-Aktivität (Storj Ingress)", "id": 1006, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 222 }, "collapsed": false, "panels": [] },
-
-    { "type": "stat", "title": "Letzte 10 min", "id": 70, "gridPos": { "h": 4, "w": 4, "x": 0, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Letzte 1 h", "id": 71, "gridPos": { "h": 4, "w": 4, "x": 4, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[1h]))", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Letzte 5 h", "id": 72, "gridPos": { "h": 4, "w": 4, "x": 8, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[5h]))", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Letzte 10 h", "id": 73, "gridPos": { "h": 4, "w": 4, "x": 12, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10h]))", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Letzte 24 h", "id": 74, "gridPos": { "h": 4, "w": 4, "x": 16, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[24h]))", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "background", "fixedColor": "#00d4aa" }, "unit": "bytes", "decimals": 2 } },
-      "options": { "colorMode": "background", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "stat", "title": "Live-Rate (5m)", "id": 75, "gridPos": { "h": 4, "w": 4, "x": 20, "y": 223 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "A", "instant": true }],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "Bps", "decimals": 2 } },
-      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
-    },
-    { "type": "table", "title": "Geschrieben pro Node", "id": 76, "gridPos": { "h": 6, "w": 24, "x": 0, "y": 227 },
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "format": "table", "instant": true },
-        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[1h]))", "refId": "B", "format": "table", "instant": true },
-        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[5h]))", "refId": "C", "format": "table", "instant": true },
-        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[10h]))", "refId": "D", "format": "table", "instant": true },
-        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[24h]))", "refId": "E", "format": "table", "instant": true }
-      ],
-      "transformations": [
-        { "id": "merge", "options": {} },
-        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true }, "renameByName": { "node": "Node", "Value #A": "10 min", "Value #B": "1 h", "Value #C": "5 h", "Value #D": "10 h", "Value #E": "24 h" }, "indexByName": { "node": 0, "Value #A": 1, "Value #B": 2, "Value #C": 3, "Value #D": 4, "Value #E": 5 } } }
-      ],
-      "fieldConfig": {
-        "defaults": { "custom": { "align": "center", "cellOptions": { "type": "auto" }, "filterable": true }, "unit": "bytes", "decimals": 2 },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "Node" }, "properties": [{ "id": "unit", "value": "none" }, { "id": "custom.width", "value": 140 }] },
-          { "matcher": { "id": "byRegexp", "options": "10 min|1 h|5 h|10 h|24 h" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-BlPu" } }] }
-        ]
-      }
-    },
-
-    { "type": "row", "title": "🛰️ Satelliten-Scores", "id": 1004, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 233 }, "collapsed": false, "panels": [] },
-
-    { "type": "table", "title": "Audit-Score", "id": 40, "gridPos": { "h": 7, "w": 8, "x": 0, "y": 234 },
-      "description": "Audit-Score: Storj testet ob deine Node Daten korrekt liefern kann. < 0.95 = Suspension droht, < 0.60 = Disqualifikation (Datenverlust).",
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_satellite_audit_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
-      "transformations": [
-        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "satellite_id": true } } },
-        { "id": "groupingToMatrix", "options": { "rowField": "satellite", "columnField": "node", "valueField": "Value", "emptyValue": "null" } },
-        { "id": "renameByRegex", "options": { "regex": "satellite.*", "renamePattern": "Satellit" } }
-      ],
-      "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "gradient" } }, "unit": "percentunit", "decimals": 4, "min": 0.85, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } },
-        "overrides": [{ "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "unit", "value": "none" }, { "id": "custom.width", "value": 100 }] }] }
-    },
-    { "type": "table", "title": "Suspension-Score", "id": 41, "gridPos": { "h": 7, "w": 8, "x": 8, "y": 234 },
-      "description": "Suspension-Score: misst wie 'verfügbar' deine Node für Audits ist. Niedrig = vorübergehende Suspension möglich.",
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_satellite_suspension_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
-      "transformations": [
-        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "satellite_id": true } } },
-        { "id": "groupingToMatrix", "options": { "rowField": "satellite", "columnField": "node", "valueField": "Value", "emptyValue": "null" } },
-        { "id": "renameByRegex", "options": { "regex": "satellite.*", "renamePattern": "Satellit" } }
-      ],
-      "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "gradient" } }, "unit": "percentunit", "decimals": 4, "min": 0.85, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } },
-        "overrides": [{ "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "unit", "value": "none" }, { "id": "custom.width", "value": 100 }] }] }
-    },
-    { "type": "table", "title": "Online-Score", "id": 42, "gridPos": { "h": 7, "w": 8, "x": 16, "y": 234 },
-      "description": "Online-Score: % der Zeit, in der dein Node von Satelliten erreichbar war (Audits + Up-Checks). Niedrig = Verbindungsprobleme.",
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_satellite_online_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
-      "transformations": [
-        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "satellite_id": true } } },
-        { "id": "groupingToMatrix", "options": { "rowField": "satellite", "columnField": "node", "valueField": "Value", "emptyValue": "null" } },
-        { "id": "renameByRegex", "options": { "regex": "satellite.*", "renamePattern": "Satellit" } }
-      ],
-      "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "gradient" } }, "unit": "percentunit", "decimals": 4, "min": 0.85, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } },
-        "overrides": [{ "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "unit", "value": "none" }, { "id": "custom.width", "value": 100 }] }] }
+          { "matcher": { "id": "byName", "options": "USD" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#f7c948" } }] },
+          { "matcher": { "id": "byName", "options": "EUR" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }, { "id": "unit", "value": "currencyEUR" }] }
+        ] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "min", "max", "mean"] }, "tooltip": { "mode": "multi" } }
     }
   ]
 }
