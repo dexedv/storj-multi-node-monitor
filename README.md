@@ -1,5 +1,7 @@
 # Storj Multi-Node Monitor
 
+**🇩🇪 Deutsch** · [🇬🇧 English](README.en.md)
+
 Komplettes Monitoring-Stack für mehrere Storj-Nodes auf einem Windows-Host. Liefert vier Grafana-Dashboards (Master, Per-Node Drilldown, Mobile, TV), Discord-Alerts, tägliche/wöchentliche Discord-Reports und Host-Metriken.
 
 ## Komponenten
@@ -33,7 +35,6 @@ windows_exporter ─┘
 - 💰 **Earnings-Forecast** in USD + EUR mit aktuellem STORJ-Token-Preis (CoinGecko)
 - 🖥 **Host-Monitoring** — CPU/RAM/Disk via windows_exporter
 - 🟢 **Status-Banner** — Fleet-Health auf einen Blick
-- 🔗 **Wallet-Panel** mit Klick-Durch zu Etherscan (L1) und zkSync Era (L2)
 
 ---
 
