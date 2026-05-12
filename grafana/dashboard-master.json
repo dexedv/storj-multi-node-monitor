@@ -163,54 +163,29 @@
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
 
-    { "type": "row", "title": "🏦 Wallets & Identitäten", "id": 1005, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 }, "collapsed": false, "panels": [] },
-    { "type": "table", "title": "Wallet-Adressen pro Node", "id": 60, "gridPos": { "h": 5, "w": 24, "x": 0, "y": 12 },
-      "description": "Wallet-Adressen, an die Storj auszahlt. Klick auf Wallet öffnet Etherscan (Ethereum L1) oder zkSync Era Explorer (L2).",
-      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "storj_node_info", "refId": "A", "format": "table", "instant": true }],
-      "transformations": [
-        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "Value": true, "node_id": true }, "renameByName": { "node": "Node", "version": "Version", "wallet": "Wallet" }, "indexByName": { "node": 0, "wallet": 1, "version": 2 } } }
-      ],
-      "fieldConfig": {
-        "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": true } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "Wallet" }, "properties": [
-            { "id": "links", "value": [
-              { "title": "Etherscan (L1)", "url": "https://etherscan.io/token/0xb64ef51c888972c908cfacf59b47c1afbc0ab8ac?a=${__value.text}", "targetBlank": true },
-              { "title": "zkSync Era Explorer (L2)", "url": "https://explorer.zksync.io/address/${__value.text}", "targetBlank": true }
-            ] },
-            { "id": "custom.cellOptions", "value": { "type": "color-text" } },
-            { "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }
-          ] },
-          { "matcher": { "id": "byName", "options": "Node" }, "properties": [{ "id": "custom.width", "value": 140 }] },
-          { "matcher": { "id": "byName", "options": "Version" }, "properties": [{ "id": "custom.width", "value": 120 }] }
-        ]
-      }
-    },
+    { "type": "row", "title": "📦 Node-Details", "id": 1002, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 }, "collapsed": false, "panels": [] },
+    { "type": "row", "title": "Node $node", "id": 1010, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 }, "collapsed": false, "repeat": "node", "repeatDirection": "v", "panels": [] },
 
-    { "type": "row", "title": "📦 Node-Details", "id": 1002, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 }, "collapsed": false, "panels": [] },
-    { "type": "row", "title": "Node $node", "id": 1010, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }, "collapsed": false, "repeat": "node", "repeatDirection": "v", "panels": [] },
-
-    { "type": "stat", "title": "Status", "id": 10, "gridPos": { "h": 4, "w": 3, "x": 0, "y": 19 },
+    { "type": "stat", "title": "Status", "id": 10, "gridPos": { "h": 4, "w": 3, "x": 0, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_node_up{node=\"$node\"}", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "ONLINE", "color": "#00d4aa" } } }], "unit": "none" } },
       "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
     },
-    { "type": "gauge", "title": "Disk %", "id": 11, "gridPos": { "h": 4, "w": 4, "x": 3, "y": 19 },
+    { "type": "gauge", "title": "Disk %", "id": 11, "gridPos": { "h": 4, "w": 4, "x": 3, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj:disk_used_percent{node=\"$node\"}", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "min": 0, "max": 100, "decimals": 1 } },
       "options": { "showThresholdMarkers": true, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Voll in", "id": 12, "gridPos": { "h": 4, "w": 2, "x": 7, "y": 19 },
+    { "type": "stat", "title": "Voll in", "id": 12, "gridPos": { "h": 4, "w": 2, "x": 7, "y": 13 },
       "description": "Forecast wann die Disk voll ist, basierend auf aktueller Füllrate. < 30 Tage: gelb, < 1 Tag: rot.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "clamp_min(storj:disk_full_in_days{node=\"$node\"}, 0)", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "#00d4aa", "value": 90 }] }, "unit": "d", "decimals": 0 } },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
     },
-    { "type": "stat", "title": "Speicher", "id": 13, "gridPos": { "h": 4, "w": 4, "x": 9, "y": 19 },
+    { "type": "stat", "title": "Speicher", "id": 13, "gridPos": { "h": 4, "w": 4, "x": 9, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
         { "expr": "storj_disk_used_bytes{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "belegt" },
@@ -225,7 +200,7 @@
         ] },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Bandbreite", "id": 14, "gridPos": { "h": 4, "w": 3, "x": 13, "y": 19 },
+    { "type": "stat", "title": "Bandbreite", "id": 14, "gridPos": { "h": 4, "w": 3, "x": 13, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [
         { "expr": "storj_bandwidth_used_bytes{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "Monat" },
@@ -235,25 +210,25 @@
         "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "Bps" }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] }] },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Einnahmen", "id": 15, "gridPos": { "h": 4, "w": 3, "x": 16, "y": 19 },
+    { "type": "stat", "title": "Einnahmen", "id": 15, "gridPos": { "h": 4, "w": 3, "x": 16, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_payout_current_month_usd{node=\"$node\"}", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 } },
       "options": { "colorMode": "background", "graphMode": "none", "textMode": "value" }
     },
-    { "type": "stat", "title": "Audit (min)", "id": 16, "gridPos": { "h": 4, "w": 2, "x": 19, "y": 19 },
+    { "type": "stat", "title": "Audit (min)", "id": 16, "gridPos": { "h": 4, "w": 2, "x": 19, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "min(storj_satellite_audit_score{node=\"$node\"})", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] }, "unit": "percentunit", "decimals": 3, "min": 0.85, "max": 1 } },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value" }
     },
-    { "type": "stat", "title": "Up 24h", "id": 17, "gridPos": { "h": 4, "w": 2, "x": 21, "y": 19 },
+    { "type": "stat", "title": "Up 24h", "id": 17, "gridPos": { "h": 4, "w": 2, "x": 21, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj:uptime_24h_percent{node=\"$node\"}", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "#00d4aa", "value": 99 }] }, "unit": "percent", "decimals": 1 } },
       "options": { "colorMode": "value", "graphMode": "none", "textMode": "value" }
     },
-    { "type": "stat", "title": "QUIC", "id": 18, "gridPos": { "h": 4, "w": 1, "x": 23, "y": 19 },
+    { "type": "stat", "title": "QUIC", "id": 18, "gridPos": { "h": 4, "w": 1, "x": 23, "y": 13 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_node_quic_ok{node=\"$node\"}", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "NO" }, "1": { "text": "OK" } } }], "unit": "none" } },
