@@ -77,10 +77,19 @@ def fetch_node_metrics(port):
         metrics["error"] = str(e)
         return metrics
 
-    # Satellites — newer Storj API uses satelliteName (URL) instead of satelliteId.
+    # Satellites + global bandwidth summary
     metrics["satellites"] = []
+    metrics["bw_ingress"] = 0
+    metrics["bw_egress"] = 0
+    metrics["storage_summary"] = 0
+    metrics["average_usage_bytes"] = 0
     try:
         sats_data = http_get_json(f"{base}/api/sno/satellites")
+        # New API exposes global bandwidth on top level (not per-satellite)
+        metrics["bw_ingress"] = sats_data.get("ingressSummary", 0) or 0
+        metrics["bw_egress"] = sats_data.get("egressSummary", 0) or 0
+        metrics["storage_summary"] = sats_data.get("storageSummary", 0) or 0
+        metrics["average_usage_bytes"] = sats_data.get("averageUsageBytes", 0) or 0
         for sat in (sats_data.get("audits") or []):
             name = sat.get("satelliteName") or sat.get("satelliteId") or "unknown"
             metrics["satellites"].append({
@@ -155,8 +164,12 @@ def render_prometheus(all_metrics):
         ("storj_disk_overused_bytes", "gauge", "Disk space overused"),
         ("storj_disk_total_bytes", "gauge", "Total disk space allocated"),
 
-        ("storj_bandwidth_used_bytes", "gauge", "Bandwidth used this month"),
+        ("storj_bandwidth_used_bytes", "gauge", "Bandwidth used this month (ingress + egress, from /api/sno)"),
         ("storj_bandwidth_available_bytes", "gauge", "Bandwidth still available this month"),
+        ("storj_bandwidth_ingress_bytes", "gauge", "Total ingress (data downloaded by the node) this month from satellites summary"),
+        ("storj_bandwidth_egress_bytes", "gauge", "Total egress (data sent by the node) this month from satellites summary"),
+        ("storj_storage_summary_byte_hours", "gauge", "Cumulative byte-hours stored this month"),
+        ("storj_average_usage_bytes", "gauge", "Average storage usage in bytes over the current month"),
 
         ("storj_satellite_audit_score", "gauge", "Audit score for a satellite (0-1)"),
         ("storj_satellite_suspension_score", "gauge", "Suspension score for a satellite (0-1)"),
@@ -218,6 +231,10 @@ def render_prometheus(all_metrics):
         # Bandwidth
         lines.append(f'storj_bandwidth_used_bytes{{{node_label}}} {m.get("bw_used", 0)}')
         lines.append(f'storj_bandwidth_available_bytes{{{node_label}}} {m.get("bw_available", 0)}')
+        lines.append(f'storj_bandwidth_ingress_bytes{{{node_label}}} {m.get("bw_ingress", 0)}')
+        lines.append(f'storj_bandwidth_egress_bytes{{{node_label}}} {m.get("bw_egress", 0)}')
+        lines.append(f'storj_storage_summary_byte_hours{{{node_label}}} {m.get("storage_summary", 0)}')
+        lines.append(f'storj_average_usage_bytes{{{node_label}}} {m.get("average_usage_bytes", 0)}')
 
         # Payout
         lines.append(f'storj_payout_current_month_usd{{{node_label}}} {m.get("payout_current_month", 0):.4f}')

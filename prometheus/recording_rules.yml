@@ -23,16 +23,16 @@ groups:
         expr: 100 * avg_over_time(storj_node_up[30d])
 
       - record: storj:egress_rate_5m_bps
-        expr: rate(storj_satellite_egress_bytes[5m])
+        expr: rate(storj_bandwidth_egress_bytes[5m])
 
       - record: storj:ingress_rate_5m_bps
-        expr: rate(storj_satellite_ingress_bytes[5m])
+        expr: rate(storj_bandwidth_ingress_bytes[5m])
 
       - record: storj:egress_rate_1h_bps
-        expr: rate(storj_satellite_egress_bytes[1h])
+        expr: rate(storj_bandwidth_egress_bytes[1h])
 
       - record: storj:ingress_rate_1h_bps
-        expr: rate(storj_satellite_ingress_bytes[1h])
+        expr: rate(storj_bandwidth_ingress_bytes[1h])
 
       # Linearly project current month's earnings to end of month
       # Numerator: current earnings * total seconds in month

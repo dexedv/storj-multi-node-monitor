@@ -156,31 +156,31 @@
 
     { "type": "stat", "title": "Letzte 10 min", "id": 20, "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "sum(increase(storj_bandwidth_ingress_bytes[10m]))", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
       "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
     { "type": "stat", "title": "Letzte 1 h", "id": 21, "gridPos": { "h": 4, "w": 4, "x": 4, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[1h]))", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "sum(increase(storj_bandwidth_ingress_bytes[1h]))", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
       "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
     { "type": "stat", "title": "Letzte 5 h", "id": 22, "gridPos": { "h": 4, "w": 4, "x": 8, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[5h]))", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "sum(increase(storj_bandwidth_ingress_bytes[5h]))", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
       "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
     { "type": "stat", "title": "Letzte 10 h", "id": 23, "gridPos": { "h": 4, "w": 4, "x": 12, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10h]))", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "sum(increase(storj_bandwidth_ingress_bytes[10h]))", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
       "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
     { "type": "stat", "title": "Letzte 24 h", "id": 24, "gridPos": { "h": 4, "w": 4, "x": 16, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[24h]))", "refId": "A", "instant": true }],
+      "targets": [{ "expr": "sum(increase(storj_bandwidth_ingress_bytes[24h]))", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "bytes", "decimals": 2 } },
       "options": { "colorMode": "background", "graphMode": "area", "textMode": "value" }
     },
