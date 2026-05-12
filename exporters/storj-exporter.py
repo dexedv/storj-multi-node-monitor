@@ -77,14 +77,15 @@ def fetch_node_metrics(port):
         metrics["error"] = str(e)
         return metrics
 
-    # Satellites
+    # Satellites — newer Storj API uses satelliteName (URL) instead of satelliteId.
     metrics["satellites"] = []
     try:
         sats_data = http_get_json(f"{base}/api/sno/satellites")
         for sat in (sats_data.get("audits") or []):
+            name = sat.get("satelliteName") or sat.get("satelliteId") or "unknown"
             metrics["satellites"].append({
-                "id": sat.get("satelliteId", "unknown"),
-                "url": sat.get("satelliteName", ""),
+                "id": name,
+                "url": name,
                 "audit_score": sat.get("auditScore", 0) or 0,
                 "suspension_score": sat.get("suspensionScore", 0) or 0,
                 "online_score": sat.get("onlineScore", 0) or 0,
@@ -116,14 +117,22 @@ def fetch_node_metrics(port):
 
 
 def well_known_sat_name(sat_id):
-    """Map satellite IDs to friendly names."""
+    """Map satellite IDs or URLs to friendly names."""
+    # New API gives URL like 'us1.storj.io:7777' as the identifier.
     known = {
         "12EayRS2V1kEsWESU9QMRseFhdxYxKicsiFmxrsLZHeLUtdps3S": "US1",
         "12L9nCYHy3iE3pj66YHcL8gkBhrybQYAEFC9SCMfXctzKKnvkjW": "EU1",
         "121RTSDpyNZVcEU84Ticf2L1ntiuUimbWgfATz21tuvgk3vzoA6": "AP1",
         "1wFTAgs9DP5RSnCqKV1eLf6N9wtk4EAtmN5DpSxcs8EjT69tGE": "SaltLake",
     }
-    return known.get(sat_id, sat_id[:10] if sat_id else "unknown")
+    if sat_id in known:
+        return known[sat_id]
+    s = (sat_id or "").lower()
+    if "us1." in s: return "US1"
+    if "eu1." in s: return "EU1"
+    if "ap1." in s: return "AP1"
+    if "saltlake" in s or "tardigrade" in s: return "SaltLake"
+    return sat_id.split(":")[0][:16] if sat_id else "unknown"
 
 
 def render_prometheus(all_metrics):
