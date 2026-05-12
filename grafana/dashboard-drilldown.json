@@ -1,0 +1,207 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    { "title": "🏠 Master", "type": "link", "url": "/d/storj-multi-node", "icon": "external link", "tags": [] }
+  ],
+  "tags": ["storj", "storj-drilldown"],
+  "title": "Storj Drilldown — eine Node im Detail",
+  "uid": "storj-drilldown",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "style": "dark",
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "label": "Node",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+        "query": { "qryType": 1, "query": "label_values(storj_node_up, node)", "refId": "StandardVariableQuery" },
+        "refresh": 1,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "panels": [
+    { "type": "row", "title": "Node: $node", "id": 100, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "collapsed": false, "panels": [] },
+
+    { "type": "stat", "title": "Status", "id": 1, "gridPos": { "h": 5, "w": 4, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_node_up{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "ONLINE", "color": "#00d4aa" } } }] } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Uptime", "id": 2, "gridPos": { "h": 5, "w": 5, "x": 4, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_node_uptime_seconds{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "s" } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    { "type": "stat", "title": "Up 24h / 7d / 30d", "id": 3, "gridPos": { "h": 5, "w": 6, "x": 9, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj:uptime_24h_percent{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "24h" },
+        { "expr": "storj:uptime_7d_percent{node=\"$node\"}", "refId": "B", "instant": true, "legendFormat": "7d" },
+        { "expr": "storj:uptime_30d_percent{node=\"$node\"}", "refId": "C", "instant": true, "legendFormat": "30d" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "#00d4aa", "value": 99 }] }, "unit": "percent", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "stat", "title": "Version & QUIC", "id": 4, "gridPos": { "h": 5, "w": 5, "x": 15, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_node_up_to_date{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "Update" },
+        { "expr": "storj_node_quic_ok{node=\"$node\"}", "refId": "B", "instant": true, "legendFormat": "QUIC" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "#00d4aa", "value": 1 }] }, "mappings": [{ "type": "value", "options": { "0": { "text": "NO" }, "1": { "text": "OK" } } }] } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "stat", "title": "Open Web-UI ↗", "id": 5, "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_node_info{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "mappings": [{ "type": "value", "options": { "1": { "text": "Klick →", "color": "#a259ff" } } }], "links": [{ "title": "Storj Web-UI öffnen", "url": "http://localhost:${__field.labels.node:regex}", "targetBlank": true }] } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+    },
+
+    { "type": "row", "title": "Disk & Bandbreite", "id": 200, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "collapsed": false, "panels": [] },
+
+    { "type": "gauge", "title": "Disk-Auslastung", "id": 10, "gridPos": { "h": 7, "w": 8, "x": 0, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj:disk_used_percent{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "min": 0, "max": 100, "decimals": 1 } },
+      "options": { "showThresholdMarkers": true, "showThresholdLabels": true, "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    { "type": "bargauge", "title": "Speicher-Aufteilung", "id": 11, "gridPos": { "h": 7, "w": 8, "x": 8, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_disk_used_bytes{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "belegt" },
+        { "expr": "storj_disk_trash_bytes{node=\"$node\"}", "refId": "B", "instant": true, "legendFormat": "trash" },
+        { "expr": "storj_disk_available_bytes{node=\"$node\"}", "refId": "C", "instant": true, "legendFormat": "frei" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes", "decimals": 2 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "belegt" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
+          { "matcher": { "id": "byName", "options": "trash" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ffb84d" } }] },
+          { "matcher": { "id": "byName", "options": "frei" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] }
+        ] },
+      "options": { "displayMode": "gradient", "orientation": "horizontal", "showUnfilled": false, "valueMode": "color" }
+    },
+    { "type": "stat", "title": "Voll in", "id": 12, "gridPos": { "h": 7, "w": 8, "x": 16, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "clamp_min(storj:disk_full_in_days{node=\"$node\"}, 0)", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "#00d4aa", "value": 90 }] }, "unit": "d", "decimals": 0 } },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+    },
+
+    { "type": "timeseries", "title": "Disk-Verlauf (24h)", "id": 20, "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_disk_used_bytes{node=\"$node\"}", "refId": "A", "legendFormat": "belegt" },
+        { "expr": "storj_disk_trash_bytes{node=\"$node\"}", "refId": "B", "legendFormat": "trash" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never", "stacking": { "mode": "normal", "group": "A" } } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "belegt" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
+          { "matcher": { "id": "byName", "options": "trash" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ffb84d" } }] }
+        ] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last"] }, "tooltip": { "mode": "multi" } }
+    },
+    { "type": "timeseries", "title": "Bandbreite live (Egress/Ingress)", "id": 21, "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "sum(storj:egress_rate_5m_bps{node=\"$node\"})", "refId": "A", "legendFormat": "Egress" },
+        { "expr": "sum(storj:ingress_rate_5m_bps{node=\"$node\"})", "refId": "B", "legendFormat": "Ingress" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "Bps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Egress" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
+          { "matcher": { "id": "byName", "options": "Ingress" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] }
+        ] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+
+    { "type": "row", "title": "Earnings", "id": 300, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 }, "collapsed": false, "panels": [] },
+
+    { "type": "stat", "title": "Diesen Monat", "id": 30, "gridPos": { "h": 5, "w": 6, "x": 0, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_payout_current_month_usd{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "USD" },
+        { "expr": "storj_payout_current_month_usd{node=\"$node\"} * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "B", "instant": true, "legendFormat": "EUR" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 },
+        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }] },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Held", "id": 31, "gridPos": { "h": 5, "w": 4, "x": 6, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_payout_current_held_usd{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+    { "type": "stat", "title": "Vormonat", "id": 32, "gridPos": { "h": 5, "w": 4, "x": 10, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_payout_previous_month_usd{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "none" }
+    },
+    { "type": "stat", "title": "Forecast Monatsende", "id": 33, "gridPos": { "h": 5, "w": 6, "x": 14, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj:earnings_forecast_month_usd{node=\"$node\"}", "refId": "A", "instant": true, "legendFormat": "USD" },
+        { "expr": "storj:earnings_forecast_month_usd{node=\"$node\"} * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "B", "instant": true, "legendFormat": "EUR" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "currencyUSD", "decimals": 2 },
+        "overrides": [{ "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }] },
+      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Bandbreite (Monat)", "id": 34, "gridPos": { "h": 5, "w": 4, "x": 20, "y": 22 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_bandwidth_used_bytes{node=\"$node\"}", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area" }
+    },
+
+    { "type": "timeseries", "title": "Earnings-Verlauf (USD)", "id": 35, "gridPos": { "h": 7, "w": 24, "x": 0, "y": 27 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_payout_current_month_usd{node=\"$node\"}", "refId": "A", "legendFormat": "diesen Monat" }],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "custom": { "drawStyle": "line", "lineWidth": 3, "fillOpacity": 30, "gradientMode": "opacity", "lineInterpolation": "smooth", "showPoints": "never" } } },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+
+    { "type": "row", "title": "Satelliten-Scores für $node", "id": 400, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 34 }, "collapsed": false, "panels": [] },
+
+    { "type": "table", "title": "Satelliten-Scores", "id": 40, "gridPos": { "h": 8, "w": 24, "x": 0, "y": 35 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "storj_satellite_audit_score{node=\"$node\"}", "refId": "A", "format": "table", "instant": true },
+        { "expr": "storj_satellite_suspension_score{node=\"$node\"}", "refId": "B", "format": "table", "instant": true },
+        { "expr": "storj_satellite_online_score{node=\"$node\"}", "refId": "C", "format": "table", "instant": true },
+        { "expr": "storj_satellite_ingress_bytes{node=\"$node\"}", "refId": "D", "format": "table", "instant": true },
+        { "expr": "storj_satellite_egress_bytes{node=\"$node\"}", "refId": "E", "format": "table", "instant": true }
+      ],
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true, "satellite_id": true, "node": true }, "renameByName": { "satellite": "Satellit", "Value #A": "Audit", "Value #B": "Suspension", "Value #C": "Online", "Value #D": "Ingress (M)", "Value #E": "Egress (M)" }, "indexByName": { "satellite": 0, "Value #A": 1, "Value #B": 2, "Value #C": 3, "Value #D": 4, "Value #E": 5 } } }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "center", "filterable": true } },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "Audit|Suspension|Online" }, "properties": [
+            { "id": "unit", "value": "percentunit" }, { "id": "decimals", "value": 4 }, { "id": "min", "value": 0.85 }, { "id": "max", "value": 1 },
+            { "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } },
+            { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } }
+          ] },
+          { "matcher": { "id": "byRegexp", "options": "Ingress|Egress" }, "properties": [{ "id": "unit", "value": "bytes" }, { "id": "decimals", "value": 2 }] }
+        ]
+      }
+    }
+  ]
+}

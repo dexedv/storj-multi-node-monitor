@@ -1,0 +1,49 @@
+# Alertmanager configuration — Discord only
+# Replace YOUR_DISCORD_WEBHOOK_URL with your actual webhook before starting.
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'node']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'discord'
+
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: 'discord'
+      repeat_interval: 1h
+    - matchers:
+        - severity = warning
+      receiver: 'discord'
+    - matchers:
+        - severity = info
+      receiver: 'discord'
+      repeat_interval: 24h
+
+receivers:
+  - name: 'discord'
+    discord_configs:
+      - webhook_url: 'YOUR_DISCORD_WEBHOOK_URL'
+        title: '{{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }} {{ .CommonAnnotations.summary }}'
+        message: |
+          **Status:** {{ .Status | toUpper }}
+          **Severity:** {{ .CommonLabels.severity }}
+
+          {{ range .Alerts }}
+          **Alert:** {{ .Labels.alertname }}
+          **Node:** {{ .Labels.node }}
+          {{ if .Labels.satellite }}**Satellite:** {{ .Labels.satellite }}{{ end }}
+          **Description:** {{ .Annotations.description }}
+          **Started:** {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+
+inhibit_rules:
+  - source_matchers:
+      - alertname = StorjNodeDisqualified
+    target_matchers:
+      - alertname = StorjAuditScoreLow
+    equal: ['node', 'satellite']

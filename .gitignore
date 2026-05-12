@@ -1,0 +1,35 @@
+# Secrets
+.env
+*.env.local
+
+# Local logs/state
+*.log
+**/data/
+fix-winexp.log
+imagepath-check.txt
+
+# Downloaded binaries
+*.zip
+*.msi
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Personal scratch
+scratch/

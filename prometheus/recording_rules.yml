@@ -1,0 +1,73 @@
+groups:
+  - name: storj_recording_rules
+    interval: 60s
+    rules:
+      - record: storj:disk_used_percent
+        expr: 100 * storj_disk_used_bytes / (storj_disk_used_bytes + storj_disk_available_bytes + storj_disk_trash_bytes)
+
+      - record: storj:disk_full_in_seconds
+        expr: |
+          (storj_disk_available_bytes - storj_disk_trash_bytes) /
+          clamp_min(deriv(storj_disk_used_bytes[6h]), 1)
+
+      - record: storj:disk_full_in_days
+        expr: storj:disk_full_in_seconds / 86400
+
+      - record: storj:uptime_24h_percent
+        expr: 100 * avg_over_time(storj_node_up[24h])
+
+      - record: storj:uptime_7d_percent
+        expr: 100 * avg_over_time(storj_node_up[7d])
+
+      - record: storj:uptime_30d_percent
+        expr: 100 * avg_over_time(storj_node_up[30d])
+
+      - record: storj:egress_rate_5m_bps
+        expr: rate(storj_satellite_egress_bytes[5m])
+
+      - record: storj:ingress_rate_5m_bps
+        expr: rate(storj_satellite_ingress_bytes[5m])
+
+      - record: storj:egress_rate_1h_bps
+        expr: rate(storj_satellite_egress_bytes[1h])
+
+      - record: storj:ingress_rate_1h_bps
+        expr: rate(storj_satellite_ingress_bytes[1h])
+
+      # Linearly project current month's earnings to end of month
+      # Numerator: current earnings * total seconds in month
+      # Denominator: seconds elapsed in month (clamped to avoid div-by-zero at month start)
+      - record: storj:earnings_forecast_month_usd
+        expr: |
+          storj_payout_current_month_usd
+          * (
+            (day_of_month(timestamp(storj_payout_current_month_usd)) * 0 + 30 * 86400)
+            / clamp_min(
+                (day_of_month(timestamp(storj_payout_current_month_usd)) - 1) * 86400
+                + hour(timestamp(storj_payout_current_month_usd)) * 3600
+                + minute(timestamp(storj_payout_current_month_usd)) * 60
+                + 1,
+                3600)
+          )
+
+      - record: storj:earnings_forecast_total_usd
+        expr: sum(storj:earnings_forecast_month_usd)
+
+      # Status-sort: 0=critical (down), 1=warning, 2=ok
+      - record: storj:node_status_rank
+        expr: |
+          (storj_node_up == 0) * 0
+          + (storj_node_up == 1 and (storj_node_quic_ok == 0 or storj_node_up_to_date == 0)) * 1
+          + (storj_node_up == 1 and storj_node_quic_ok == 1 and storj_node_up_to_date == 1) * 2
+
+      # Combined fleet health: min of all node statuses (worst node wins)
+      - record: storj:fleet_min_status
+        expr: min(storj:node_status_rank)
+
+      # Earnings in EUR (per node)
+      - record: storj:earnings_eur
+        expr: storj_payout_current_month_usd * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)
+
+      # Earnings forecast in EUR
+      - record: storj:earnings_forecast_month_eur
+        expr: storj:earnings_forecast_month_usd * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)

@@ -1,0 +1,180 @@
+# Alert rules for Storj nodes (extended)
+groups:
+  - name: storj_node_alerts
+    interval: 60s
+    rules:
+      - alert: StorjNodeDownShort
+        expr: storj_node_up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Storj node {{ $labels.node }} ist seit 5 Min offline"
+          description: "Node {{ $labels.node }} antwortet nicht. Bitte pruefen."
+
+      - alert: StorjNodeDownLong
+        expr: storj_node_up == 0
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Storj node {{ $labels.node }} seit 1 STUNDE OFFLINE"
+          description: "Node {{ $labels.node }} ist seit ueber einer Stunde offline. Sofort handeln noetig."
+
+      - alert: StorjDiskAlmostFull
+        expr: storj:disk_used_percent > 95
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk fast voll auf {{ $labels.node }} ({{ $value | printf \"%.1f\" }}%)"
+          description: "Disk-Auslastung uebersteigt 95% seit 10+ Minuten."
+
+      - alert: StorjDiskForecastFull
+        expr: storj:disk_full_in_days > 0 and storj:disk_full_in_days < 30
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk wird in ~{{ $value | printf \"%.0f\" }} Tagen voll auf {{ $labels.node }}"
+          description: "Aktuelle Fuellrate prognostiziert Disk-Voll in unter 30 Tagen."
+
+      - alert: StorjDiskOverused
+        expr: storj_disk_overused_bytes > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk ueberbelegt auf {{ $labels.node }}"
+          description: "Node hat mehr Daten als die zugewiesene Allokation. Allokation erhoehen."
+
+      - alert: StorjAuditScoreLow
+        expr: storj_satellite_audit_score < 0.95
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Niedriger Audit-Score auf {{ $labels.node }} / {{ $labels.satellite }}"
+          description: "Audit-Score ist {{ $value | humanizePercentage }} — Disqualifikations-Risiko."
+
+      - alert: StorjAuditScoreCritical
+        expr: storj_satellite_audit_score < 0.85
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "KRITISCHER Audit-Score {{ $labels.node }} / {{ $labels.satellite }}"
+          description: "Audit-Score ist {{ $value | humanizePercentage }} — DISQUALIFIKATION DROHT!"
+
+      - alert: StorjSuspensionScoreLow
+        expr: storj_satellite_suspension_score < 0.95
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Niedriger Suspension-Score {{ $labels.node }} / {{ $labels.satellite }}"
+          description: "Suspension-Score ist {{ $value | humanizePercentage }}."
+
+      - alert: StorjNodeSuspended
+        expr: storj_satellite_suspended == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.node }} suspended auf {{ $labels.satellite }}"
+          description: "Node ist suspended."
+
+      - alert: StorjNodeDisqualified
+        expr: storj_satellite_disqualified == 1
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.node }} DISQUALIFIZIERT auf {{ $labels.satellite }}"
+          description: "Datenverlust wahrscheinlich."
+
+      - alert: StorjOnlineScoreLow
+        expr: storj_satellite_online_score < 0.90
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Niedriger Online-Score {{ $labels.node }} / {{ $labels.satellite }}"
+          description: "Online-Score ist {{ $value | humanizePercentage }} — Verbindungsprobleme?"
+
+      - alert: StorjQuicNotOK
+        expr: storj_node_quic_ok == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "QUIC-Probleme auf {{ $labels.node }}"
+          description: "QUIC-Connectivity-Check schlaegt fehl."
+
+      - alert: StorjSoftwareOutdated
+        expr: storj_node_up_to_date == 0
+        for: 24h
+        labels:
+          severity: info
+        annotations:
+          summary: "Node-Software veraltet: {{ $labels.node }}"
+          description: "Node laeuft seit 24h+ mit veralteter Software."
+
+  - name: storj_market_alerts
+    interval: 5m
+    rules:
+      - alert: StorjPriceDrop24h
+        expr: storj_token_price_24h_change_percent{currency="usd"} < -20
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "STORJ-Preis -{{ $value | printf \"%.1f\" }}% in 24h"
+          description: "STORJ-Token ist heftig gefallen. Earnings entsprechend weniger wert."
+
+      - alert: StorjPriceJump24h
+        expr: storj_token_price_24h_change_percent{currency="usd"} > 20
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "STORJ-Preis +{{ $value | printf \"%.1f\" }}% in 24h"
+          description: "STORJ-Token Pump. Vielleicht guter Auszahlungszeitpunkt."
+
+      - alert: StorjPriceFeedDown
+        expr: absent(storj_token_price_usd) or up{job="storj_price"} == 0
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "STORJ-Preis-Feed nicht erreichbar"
+          description: "CoinGecko-Abfrage liefert keine Daten mehr."
+
+      - alert: StorjWalletChanged
+        expr: count by (node) (changes(storj_node_info[1h]) > 0) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Wallet-Adresse hat sich geaendert auf {{ $labels.node }}"
+          description: "Die Wallet-Adresse, an die ausgezahlt wird, hat sich geaendert. SOFORT pruefen ob das gewollt war."
+
+  - name: storj_host_alerts
+    interval: 60s
+    rules:
+      - alert: HostDiskAlmostFull
+        expr: 100 * (windows_logical_disk_size_bytes - windows_logical_disk_free_bytes) / windows_logical_disk_size_bytes > 95
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host-Disk {{ $labels.volume }} fast voll ({{ $value | printf \"%.1f\" }}%)"
+          description: "Volume {{ $labels.volume }} hat ueber 95% Auslastung."
+
+      - alert: HostMemoryHigh
+        expr: 100 * (1 - windows_memory_available_bytes / windows_cs_physical_memory_bytes) > 90
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Hoher RAM-Verbrauch ({{ $value | printf \"%.1f\" }}%)"
+          description: "RAM-Auslastung ueber 90% seit 15+ Minuten."
