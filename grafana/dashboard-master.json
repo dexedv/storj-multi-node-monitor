@@ -311,9 +311,69 @@
       "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
     },
 
-    { "type": "row", "title": "Satelliten-Scores", "id": 1004, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 222 }, "collapsed": false, "panels": [] },
+    { "type": "row", "title": "Schreib-Aktivität (Storj Ingress)", "id": 1006, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 222 }, "collapsed": false, "panels": [] },
 
-    { "type": "table", "title": "Audit-Score", "id": 40, "gridPos": { "h": 7, "w": 8, "x": 0, "y": 223 },
+    { "type": "stat", "title": "Letzte 10 min", "id": 70, "gridPos": { "h": 4, "w": 4, "x": 0, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "stat", "title": "Letzte 1 h", "id": 71, "gridPos": { "h": 4, "w": 4, "x": 4, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[1h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "stat", "title": "Letzte 5 h", "id": 72, "gridPos": { "h": 4, "w": 4, "x": 8, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[5h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "stat", "title": "Letzte 10 h", "id": 73, "gridPos": { "h": 4, "w": 4, "x": 12, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[10h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "stat", "title": "Letzte 24 h", "id": 74, "gridPos": { "h": 4, "w": 4, "x": 16, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(increase(storj_satellite_ingress_bytes[24h]))", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "background", "fixedColor": "#00d4aa" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "stat", "title": "Live-Rate (5m)", "id": 75, "gridPos": { "h": 4, "w": 4, "x": 20, "y": 223 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "sum(storj:ingress_rate_5m_bps)", "refId": "A", "instant": true }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#a259ff" }, "unit": "Bps", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "auto" }
+    },
+    { "type": "table", "title": "Geschrieben pro Node", "id": 76, "gridPos": { "h": 6, "w": 24, "x": 0, "y": 227 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [
+        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[10m]))", "refId": "A", "format": "table", "instant": true },
+        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[1h]))", "refId": "B", "format": "table", "instant": true },
+        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[5h]))", "refId": "C", "format": "table", "instant": true },
+        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[10h]))", "refId": "D", "format": "table", "instant": true },
+        { "expr": "sum by (node) (increase(storj_satellite_ingress_bytes[24h]))", "refId": "E", "format": "table", "instant": true }
+      ],
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "job": true, "instance": true }, "renameByName": { "node": "Node", "Value #A": "10 min", "Value #B": "1 h", "Value #C": "5 h", "Value #D": "10 h", "Value #E": "24 h" }, "indexByName": { "node": 0, "Value #A": 1, "Value #B": 2, "Value #C": 3, "Value #D": 4, "Value #E": 5 } } }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "center", "cellOptions": { "type": "auto" }, "filterable": true }, "unit": "bytes", "decimals": 2 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Node" }, "properties": [{ "id": "unit", "value": "none" }, { "id": "custom.width", "value": 140 }] },
+          { "matcher": { "id": "byRegexp", "options": "10 min|1 h|5 h|10 h|24 h" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "color-background", "mode": "gradient" } }, { "id": "color", "value": { "mode": "continuous-BlPu" } }] }
+        ]
+      }
+    },
+
+    { "type": "row", "title": "Satelliten-Scores", "id": 1004, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 233 }, "collapsed": false, "panels": [] },
+
+    { "type": "table", "title": "Audit-Score", "id": 40, "gridPos": { "h": 7, "w": 8, "x": 0, "y": 234 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_satellite_audit_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
       "transformations": [
@@ -324,7 +384,7 @@
       "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "gradient" } }, "unit": "percentunit", "decimals": 4, "min": 0.85, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } },
         "overrides": [{ "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "unit", "value": "none" }, { "id": "custom.width", "value": 100 }] }] }
     },
-    { "type": "table", "title": "Suspension-Score", "id": 41, "gridPos": { "h": 7, "w": 8, "x": 8, "y": 223 },
+    { "type": "table", "title": "Suspension-Score", "id": 41, "gridPos": { "h": 7, "w": 8, "x": 8, "y": 234 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_satellite_suspension_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
       "transformations": [
@@ -335,7 +395,7 @@
       "fieldConfig": { "defaults": { "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "gradient" } }, "unit": "percentunit", "decimals": 4, "min": 0.85, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.95 }, { "color": "#00d4aa", "value": 0.99 }] } },
         "overrides": [{ "matcher": { "id": "byName", "options": "Satellit" }, "properties": [{ "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "unit", "value": "none" }, { "id": "custom.width", "value": 100 }] }] }
     },
-    { "type": "table", "title": "Online-Score", "id": 42, "gridPos": { "h": 7, "w": 8, "x": 16, "y": 223 },
+    { "type": "table", "title": "Online-Score", "id": 42, "gridPos": { "h": 7, "w": 8, "x": 16, "y": 234 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "storj_satellite_online_score{node=~\"$node\"}", "refId": "A", "format": "table", "instant": true }],
       "transformations": [
