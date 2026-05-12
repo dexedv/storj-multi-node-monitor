@@ -53,12 +53,9 @@ groups:
       - record: storj:earnings_forecast_total_usd
         expr: sum(storj:earnings_forecast_month_usd)
 
-      # Status-sort: 0=critical (down), 1=warning, 2=ok
+      # Status-Rank pro Node: 0=down, 1=warning (up aber QUIC/Update problem), 2=ok (alles gruen)
       - record: storj:node_status_rank
-        expr: |
-          (storj_node_up == 0) * 0
-          + (storj_node_up == 1 and (storj_node_quic_ok == 0 or storj_node_up_to_date == 0)) * 1
-          + (storj_node_up == 1 and storj_node_quic_ok == 1 and storj_node_up_to_date == 1) * 2
+        expr: storj_node_up + storj_node_up * storj_node_quic_ok * storj_node_up_to_date
 
       # Combined fleet health: min of all node statuses (worst node wins)
       - record: storj:fleet_min_status
