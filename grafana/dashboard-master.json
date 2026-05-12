@@ -46,54 +46,59 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "#00d4aa", "value": null }, { "color": "yellow", "value": 80 }, { "color": "red", "value": 95 }] }, "unit": "percent", "min": 0, "max": 100, "decimals": 2 } },
       "options": { "showThresholdMarkers": true, "showThresholdLabels": true, "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Belegter Speicher", "id": 2, "gridPos": { "h": 6, "w": 5, "x": 6, "y": 4 },
+    { "type": "stat", "title": "Belegt", "id": 2, "gridPos": { "h": 3, "w": 3, "x": 6, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj_disk_used_bytes", "refId": "A", "legendFormat": "belegt" },
-        { "expr": "storj_disk_trash_bytes", "refId": "B", "legendFormat": "trash" },
-        { "expr": "storj_disk_available_bytes", "refId": "C", "legendFormat": "frei" }
-      ],
-      "fieldConfig": { "defaults": { "unit": "bytes", "decimals": 2, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "text" }] } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "belegt" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#5b8cff" } }] },
-          { "matcher": { "id": "byName", "options": "trash" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#ffb84d" } }] },
-          { "matcher": { "id": "byName", "options": "frei" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] }
-        ] },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      "targets": [{ "expr": "storj_disk_used_bytes", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5b8cff" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
     },
-    { "type": "stat", "title": "Disk voll in", "id": 3, "gridPos": { "h": 6, "w": 3, "x": 11, "y": 4 },
-      "description": "Forecast wann die allozierte Disk voll ist, basierend auf Wachstumsrate der letzten 6h. Sinnvoll erst nach mehreren Stunden Datensammlung.",
+    { "type": "stat", "title": "Frei", "id": 3, "gridPos": { "h": 3, "w": 3, "x": 9, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_disk_available_bytes", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Trash", "id": 6, "gridPos": { "h": 3, "w": 3, "x": 6, "y": 7 },
+      "description": "Pending-Delete-Daten. Storj löscht zeitverzögert (7-Tage-Grace), damit Recovery möglich ist.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_disk_trash_bytes", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "bytes", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value" }
+    },
+    { "type": "stat", "title": "Disk voll in", "id": 7, "gridPos": { "h": 3, "w": 3, "x": 9, "y": 7 },
+      "description": "Forecast wann die allozierte Disk voll ist (Linear-Extrapolation aus den letzten 6h Wachstum). In den ersten Tagen unzuverlässig.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
       "targets": [{ "expr": "clamp_min(storj:disk_full_in_days, 0)", "refId": "A", "instant": true }],
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 30 }, { "color": "#00d4aa", "value": 90 }] }, "unit": "d", "decimals": 0 } },
       "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
     },
-    { "type": "stat", "title": "Einnahmen (Monat)", "id": 4, "gridPos": { "h": 6, "w": 5, "x": 14, "y": 4 },
+    { "type": "stat", "title": "Einnahmen (Monat)", "id": 4, "gridPos": { "h": 6, "w": 4, "x": 12, "y": 4 },
+      "description": "Bisher diesen Monat angesammelte Earnings. 75% Held in den ersten 9 Monaten — siehe Held-Tile.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj_payout_current_month_usd", "refId": "A", "legendFormat": "aktuell" },
-        { "expr": "storj:earnings_forecast_total_usd", "refId": "B", "legendFormat": "Forecast" },
-        { "expr": "storj_payout_current_month_usd * scalar(storj_token_price_eur) / scalar(storj_token_price_usd)", "refId": "C", "legendFormat": "in EUR" }
-      ],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 },
-        "overrides": [
-          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "#00d4aa" } }] },
-          { "matcher": { "id": "byFrameRefID", "options": "C" }, "properties": [{ "id": "unit", "value": "currencyEUR" }] }
-        ] },
-      "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      "targets": [{ "expr": "storj_payout_current_month_usd", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#f7c948" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
     },
-    { "type": "stat", "title": "Held + Vormonat", "id": 5, "gridPos": { "h": 6, "w": 5, "x": 19, "y": 4 },
-      "description": "75% wird die ersten 9 Monate zurückgehalten, dann schrittweise freigegeben. Volle Auszahlung erst nach 15 Monaten ohne Disqualifizierung.",
+    { "type": "stat", "title": "Forecast Monatsende", "id": 8, "gridPos": { "h": 6, "w": 4, "x": 16, "y": 4 },
+      "description": "Lineare Hochrechnung des aktuellen Verdienstes bis zum Monatsende.",
       "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
-      "targets": [
-        { "expr": "storj_payout_current_held_usd", "refId": "A", "legendFormat": "Held aktuell" },
-        { "expr": "storj_payout_previous_month_usd", "refId": "B", "legendFormat": "Vormonat" }
-      ],
-      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "currencyUSD", "decimals": 2 },
-        "overrides": [
-          { "matcher": { "id": "byFrameRefID", "options": "B" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "text" } }] }
-        ] },
-      "options": { "colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] } }
+      "targets": [{ "expr": "storj:earnings_forecast_total_usd", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#00d4aa" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "value", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Held", "id": 5, "gridPos": { "h": 3, "w": 4, "x": 20, "y": 4 },
+      "description": "75% der Einnahmen werden in den ersten 9 Monaten als Sicherheits-Deposit zurückgehalten. Schrittweise Freigabe danach. Volle Auszahlung nach 15 Monaten ohne Disqualifizierung.",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_payout_current_held_usd", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#ffb84d" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value", "justifyMode": "center" }
+    },
+    { "type": "stat", "title": "Vormonat", "id": 9, "gridPos": { "h": 3, "w": 4, "x": 20, "y": 7 },
+      "description": "Earnings des letzten Monats (komplett abgerechnet).",
+      "datasource": { "type": "prometheus", "uid": "bfltclibp84xsf" },
+      "targets": [{ "expr": "storj_payout_previous_month_usd", "refId": "A" }],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "unit": "currencyUSD", "decimals": 2 } },
+      "options": { "colorMode": "value", "graphMode": "area", "textMode": "value", "justifyMode": "center" }
     },
 
     { "type": "row", "title": "⚡ Live-Aktivität & System", "id": 1001, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 }, "collapsed": false, "panels": [] },
